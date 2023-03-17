@@ -1,6 +1,7 @@
 // Variables
 const formulario = document.querySelector('#agregar-gasto');
 const listadoGastos = document.querySelector('#gastos ul')
+const botonEliminarItem = document.querySelector('#eliminarItem');
 
 // Eventos
 cargarAddeventListeners();
@@ -21,7 +22,7 @@ class UI {
 
     }
 
-    
+
     insertarPresupuesto(cantidad){
         const {presupuesto, restante} = cantidad;
         document.querySelector('#total').textContent = presupuesto;
@@ -29,16 +30,21 @@ class UI {
     }
 
 
-    imprimirGasto(nombre , gasto){
-        const gastoItem = document.createElement('li');
-        gastoItem.classList.add('list-group-item','d-flex','flex-row');
-        gastoItem.innerHTML = `
-            <p>${nombre}</p>
-            <p>${gasto}</p>
-            <button class="btn btn-danger">Borrar</button>
-        `
+    imprimirGasto(gastos){
+        console.log(gastos)
+        gastos.foreach(gasto => {
+            const {nombre, cantidad, id} = gasto;
+            const gastoItem = document.createElement('li');
+            gastoItem.classList.add('list-group-item','d-flex','justify-content-around','align-items-center','flex-row');
+            gastoItem.innerHTML = `
+            <p class="fw-bold">${nombre}</p>
+            <p class="text-black-50">${cantidad}</p>
+            <p>${id}</p>
+            <a href="#" class="text-danger">Borrar</a>
+            `
         
-        listadoGastos.appendChild(gastoItem);
+            listadoGastos.appendChild(gastoItem);
+        })
     }
 
 
@@ -75,12 +81,13 @@ class Presupuesto{
         this.gastos = [];
     }
 
-    nuevoGasto(){
-        this.gastos = [...this.gastos, ];
+    nuevoGasto(gasto){
+        this.gastos = [...this.gastos, gasto];
+        console.log(this.gastos)
     }
 
     eliminarGasto(){
-
+        this.gastos = this.gastos.filter(gasto => gasto.id !== gasto.id);
     }
 
     calcularRestante(cantidad){
@@ -103,25 +110,48 @@ function agregarGasto(evento){
     // Primero:
     // Leer datos del formulario
     const nombre = document.querySelector('#gasto').value;
-    const cantidad = document.querySelector('#cantidad').value;
+    const cantidad = Number(document.querySelector('#cantidad').value);
 
     // Segundo:
     // Validar los campos
     if(nombre === '' || cantidad === ''){
         ui.imprimirAlerta('Ambos campos son obligatorios', 'error');
         return;
+    }else if(Number(nombre)){
+        ui.imprimirAlerta('El campo nombre no puede ser un número.', 'error')
+        return;
     }else if(cantidad <= 0 || isNaN(cantidad)){                  
         ui.imprimirAlerta('Cantidad no valida', 'error');
         return; 
-    }else{
-        ui.imprimirAlerta('Gasto agregado!');
-        const restante = presupuesto.calcularRestante(cantidad);
-        ui.imprimirGasto(nombre, cantidad);
-        ui.imprimirRestante(restante);
-
-        formulario.reset();
-        return;
     }
+
+    // generar objeto con el gasto:
+    const gasto = {
+        nombre, 
+        cantidad, 
+        id: Date.now()
+    }
+
+    // Generamos el restante
+    const restante = presupuesto.calcularRestante(cantidad);
+
+    // Generamos un gasto
+    presupuesto.nuevoGasto(gasto);
+
+    // Alerta
+    ui.imprimirAlerta('Gasto agregado!');
+    
+    // imprimir los gastos
+    const {gastos} = presupuesto;
+    ui.imprimirGasto(gastos);
+
+    console.log(gastos);
+
+    // Imprimimos el restante
+    ui.imprimirRestante(restante);
+
+    // Reseteamos el formulario
+    formulario.reset();
 
 }
 
