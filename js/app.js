@@ -18,11 +18,6 @@ function cargarAddeventListeners(){
 // Clases
 class UI {
 
-    listadoGastos(){
-
-    }
-
-
     insertarPresupuesto(cantidad){
         const {presupuesto, restante} = cantidad;
         document.querySelector('#total').textContent = presupuesto;
@@ -35,12 +30,13 @@ class UI {
         gastos.forEach(gasto => {
             const {nombre, cantidad, id} = gasto;
             const gastoItem = document.createElement('li');
-            gastoItem.classList.add('list-group-item','d-flex','justify-content-around','align-items-center','flex-row');
+            gastoItem.dataset.id = id;
+            gastoItem.classList.add('list-group-item','d-flex','justify-content-between','align-items-center','flex-row');
             gastoItem.innerHTML = `
-            <p class="fw-bold">${nombre}</p>
-            <p class="text-black-50">${cantidad}</p>
+            <p class="fw-bolder text-muted text-capitalize">${nombre}</p>
+            <p class="badge badge-pill bg-dark text-wrap text-white">$${cantidad}</p>
 
-            <a href="#" class="text-danger">Borrar</a>
+            <a href="#" class="btn btn-danger text-white">Borrar &times;</a>
             `
         
             listadoGastos.appendChild(gastoItem);
@@ -71,6 +67,12 @@ class UI {
 
         document.querySelector('.primario').insertBefore(divMensaje, formulario);
     }
+
+    limpiarListado(){
+        while(listadoGastos.firstChild){
+            listadoGastos.removeChild(listadoGastos.firstChild)
+        }
+    }
 }
 
 
@@ -90,7 +92,7 @@ class Presupuesto{
     }
 
     calcularRestante(cantidad){
-        this.restante = this.restante - cantidad;
+        this.restante = this.presupuesto - cantidad;
         return this.restante;
     }
     
@@ -130,7 +132,7 @@ function agregarGasto(evento){
         cantidad, 
         id: Date.now()
     }
-
+    
     // Generamos el restante
     const restante = presupuesto.calcularRestante(cantidad);
 
@@ -142,6 +144,8 @@ function agregarGasto(evento){
     
     // imprimir los gastos
     const {gastos} = presupuesto;
+    // Limpiamos el duplicado del li
+    ui.limpiarListado();
     ui.imprimirGasto(gastos);
 
     // Imprimimos el restante
@@ -150,6 +154,10 @@ function agregarGasto(evento){
     // Reseteamos el formulario
     formulario.reset();
 
+}
+
+function eliminarGastoHTML(){
+    console.log();
 }
 
 
