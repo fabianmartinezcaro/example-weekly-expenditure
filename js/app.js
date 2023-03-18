@@ -32,19 +32,19 @@ class UI {
 
     imprimirGasto(gastos){
         console.log(gastos)
-        gastos.foreach(gasto => {
+        gastos.forEach(gasto => {
             const {nombre, cantidad, id} = gasto;
             const gastoItem = document.createElement('li');
             gastoItem.classList.add('list-group-item','d-flex','justify-content-around','align-items-center','flex-row');
             gastoItem.innerHTML = `
             <p class="fw-bold">${nombre}</p>
             <p class="text-black-50">${cantidad}</p>
-            <p>${id}</p>
+
             <a href="#" class="text-danger">Borrar</a>
             `
         
             listadoGastos.appendChild(gastoItem);
-        })
+        });
     }
 
 
@@ -83,7 +83,6 @@ class Presupuesto{
 
     nuevoGasto(gasto){
         this.gastos = [...this.gastos, gasto];
-        console.log(this.gastos)
     }
 
     eliminarGasto(){
@@ -144,8 +143,6 @@ function agregarGasto(evento){
     // imprimir los gastos
     const {gastos} = presupuesto;
     ui.imprimirGasto(gastos);
-
-    console.log(gastos);
 
     // Imprimimos el restante
     ui.imprimirRestante(restante);
