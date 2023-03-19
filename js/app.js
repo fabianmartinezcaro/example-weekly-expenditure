@@ -49,6 +49,24 @@ class UI {
     }
 
 
+    nivelGasto(nivelPresupuesto){
+        const divRestante = document.querySelector('.restante');
+        const {restante, presupuesto} = nivelPresupuesto;
+
+        if(restante <= (50*presupuesto)/100 && restante > (25*presupuesto)/100){
+            divRestante.classList.remove('alert-success')
+            divRestante.classList.add('alert-warning');
+            console.log('amarillo')
+        }else if(restante <= (25*presupuesto)/100 && restante > 0){
+            divRestante.classList.remove('alert-success')
+            divRestante.classList.add('alert-danger');
+            console.log('rojo')
+        }
+
+
+    }
+
+
     imprimirAlerta(mensaje, tipo){
         const divMensaje = document.createElement('DIV');
         divMensaje.classList.add('text-center', 'alert');
@@ -73,6 +91,8 @@ class UI {
             listadoGastos.removeChild(listadoGastos.firstChild)
         }
     }
+
+
 }
 
 
@@ -92,7 +112,7 @@ class Presupuesto{
     }
 
     calcularRestante(cantidad){
-        this.restante = this.presupuesto - cantidad;
+        this.restante = this.restante - cantidad;
         return this.restante;
     }
     
@@ -144,10 +164,12 @@ function agregarGasto(evento){
     
     // imprimir los gastos
     const {gastos} = presupuesto;
+    console.log(gastos)
     // Limpiamos el duplicado del li
     ui.limpiarListado();
     ui.imprimirGasto(gastos);
 
+    ui.nivelGasto(presupuesto);
     // Imprimimos el restante
     ui.imprimirRestante(restante);
 
