@@ -1,7 +1,6 @@
 // Variables
 const formulario = document.querySelector('#agregar-gasto');
 const listadoGastos = document.querySelector('#gastos ul')
-const botonEliminarItem = document.querySelector('#eliminarItem');
 
 // Eventos
 cargarAddeventListeners();
@@ -25,44 +24,58 @@ class UI {
     }
 
 
-    imprimirGasto(gastos){
-        console.log(gastos)
+    mostrarGasto(gastos){
         gastos.forEach(gasto => {
             const {nombre, cantidad, id} = gasto;
             const gastoItem = document.createElement('li');
+            gastoItem.id = 'item-gasto';
             gastoItem.dataset.id = id;
             gastoItem.classList.add('list-group-item','d-flex','justify-content-between','align-items-center','flex-row');
             gastoItem.innerHTML = `
             <p class="fw-bolder text-muted text-capitalize">${nombre}</p>
             <p class="badge badge-pill bg-dark text-wrap text-white">$${cantidad}</p>
-
-            <a href="#" class="btn btn-danger text-white">Borrar &times;</a>
             `
+
+            const botonBorrar = document.createElement('BUTTON');
+            botonBorrar.classList.add('btn', 'btn-danger');
+            botonBorrar.textContent = 'Borrar';
+            botonBorrar.onclick = () => {
+                eliminarItem(id);
+            }
+            gastoItem.appendChild(botonBorrar);
         
             listadoGastos.appendChild(gastoItem);
         });
     }
 
 
-    imprimirRestante(restante){
+    actualizarRestante(restante){
         document.querySelector('.restante #restante').textContent = restante;
     }
 
-
+    
     nivelGasto(nivelPresupuesto){
         const divRestante = document.querySelector('.restante');
         const {restante, presupuesto} = nivelPresupuesto;
 
         if(restante <= (50*presupuesto)/100 && restante > (25*presupuesto)/100){
-            divRestante.classList.remove('alert-success')
+            divRestante.classList.remove('alert-success', 'alert-warning')
             divRestante.classList.add('alert-warning');
             console.log('amarillo')
         }else if(restante <= (25*presupuesto)/100 && restante > 0){
             divRestante.classList.remove('alert-success')
             divRestante.classList.add('alert-danger');
-            console.log('rojo')
+        }else{
+            divRestante.classList.remove('alert-danger', 'alert-warning')
+            divRestante.classList.add('alert-success')
         }
-
+        
+        
+        if(restante <= 0){
+            divRestante.classList.add('alert-danger')
+            this.imprimirAlerta('Te has quedado sin presupuesto!', 'error')
+            formulario.querySelector('button[type="submit"]').disabled = true;
+        }
 
     }
 
@@ -97,6 +110,7 @@ class UI {
 
 
 class Presupuesto{
+    
     constructor(presupuesto){
         this.presupuesto = Number(presupuesto);
         this.restante = Number(presupuesto);
@@ -105,15 +119,20 @@ class Presupuesto{
 
     nuevoGasto(gasto){
         this.gastos = [...this.gastos, gasto];
+        this.calcularRestante();
     }
 
-    eliminarGasto(){
-        this.gastos = this.gastos.filter(gasto => gasto.id !== gasto.id);
+    calcularRestante(){
+        const gastado = this.gastos.reduce((total, gasto) => total + gasto.cantidad, 0);
+        this.restante = this.presupuesto - gastado;
+        console.log(gastado);
+        console.log(this.restante);
     }
 
-    calcularRestante(cantidad){
-        this.restante = this.restante - cantidad;
-        return this.restante;
+    eliminarGasto(id){
+        this.gastos = this.gastos.filter(gasto => gasto.id !== id);
+        this.calcularRestante();
+        console.log(this.gastos);
     }
     
 }
@@ -139,7 +158,7 @@ function agregarGasto(evento){
         ui.imprimirAlerta('Ambos campos son obligatorios', 'error');
         return;
     }else if(Number(nombre)){
-        ui.imprimirAlerta('El campo nombre no puede ser un número.', 'error')
+        ui.imprimirAlerta('El campo nombre no puede ser un número.', 'error');
         return;
     }else if(cantidad <= 0 || isNaN(cantidad)){                  
         ui.imprimirAlerta('Cantidad no valida', 'error');
@@ -152,9 +171,8 @@ function agregarGasto(evento){
         cantidad, 
         id: Date.now()
     }
-    
-    // Generamos el restante
-    const restante = presupuesto.calcularRestante(cantidad);
+
+    presupuesto.calcularRestante();
 
     // Generamos un gasto
     presupuesto.nuevoGasto(gasto);
@@ -163,25 +181,29 @@ function agregarGasto(evento){
     ui.imprimirAlerta('Gasto agregado!');
     
     // imprimir los gastos
-    const {gastos} = presupuesto;
-    console.log(gastos)
+    const {gastos, restante} = presupuesto;
     // Limpiamos el duplicado del li
     ui.limpiarListado();
-    ui.imprimirGasto(gastos);
+    ui.mostrarGasto(gastos);
 
     ui.nivelGasto(presupuesto);
     // Imprimimos el restante
-    ui.imprimirRestante(restante);
-
+    ui.actualizarRestante(restante);
     // Reseteamos el formulario
     formulario.reset();
 
 }
 
-function eliminarGastoHTML(){
-    console.log();
-}
+function eliminarItem(id){
+    ui.limpiarListado();
+    // Elimina el gasto del objeto
+    presupuesto.eliminarGasto(id);
 
+    // Elimina el gasto del html
+    const {gastos,restante} = presupuesto;
+    ui.mostrarGasto(gastos);
+    ui.actualizarRestante(restante);
+}
 
 function preguntarPresupuesto(){
     const presupuestoUsuario = prompt("Cual es tu presupuesto?");
@@ -194,6 +216,5 @@ function preguntarPresupuesto(){
 
     presupuesto = new Presupuesto(presupuestoUsuario);
     ui.insertarPresupuesto(presupuesto);
-    console.log("Este es el presupuesto :", presupuesto);
 
 }
