@@ -58,21 +58,19 @@ class UI {
         const divRestante = document.querySelector('.restante');
         const {restante, presupuesto} = nivelPresupuesto;
 
-        if(restante <= (50*presupuesto)/100 && restante > (25*presupuesto)/100){
-            divRestante.classList.remove('alert-success', 'alert-warning')
-            divRestante.classList.add('alert-warning');
-            console.log('amarillo')
-        }else if(restante <= (25*presupuesto)/100 && restante > 0){
-            divRestante.classList.remove('alert-success')
+        if(restante < presupuesto * 0.25) {
+            divRestante.classList.remove('alert-success', 'alert-warning');
             divRestante.classList.add('alert-danger');
-        }else{
-            divRestante.classList.remove('alert-danger', 'alert-warning')
-            divRestante.classList.add('alert-success')
-        }
+          } else if (restante < presupuesto * 0.5) {
+            divRestante.classList.remove('alert-danger', 'alert-success');
+            divRestante.classList.add('alert-warning');
+          } else {
+            divRestante.classList.remove('alert-danger', 'alert-warning');
+            divRestante.classList.add('alert-success');
+          }
         
         
-        if(restante <= 0){
-            divRestante.classList.add('alert-danger')
+        if(restante < 0){
             this.imprimirAlerta('Te has quedado sin presupuesto!', 'error')
             formulario.querySelector('button[type="submit"]').disabled = true;
         }
@@ -202,6 +200,7 @@ function eliminarItem(id){
     // Elimina el gasto del html
     const {gastos,restante} = presupuesto;
     ui.mostrarGasto(gastos);
+    ui.nivelGasto(restante);
     ui.actualizarRestante(restante);
 }
 
